@@ -1,0 +1,17 @@
+{
+    "graphs": [{
+        "O": 3,
+        "vtcm_mb": 8,
+        "hvx_threads": 4,
+        "graph_names": ["model"]
+    }],
+    "devices": [{
+        "soc_id": 57,
+        "dsp_arch": "v75",
+        "cores": [{
+            "core_id": 0,
+            "perf_profile": "burst",
+            "rpc_control_latency": 100
+        }]
+    }]
+}

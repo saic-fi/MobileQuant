@@ -1,0 +1,14 @@
+lm-eval@git+https://github.com/fwtan/lm-evaluation-harness.git@summarization 
+transformers==4.41.0
+jsonargparse[signatures]  # CLI
+absl-py==2.1.0
+pandas==2.1.3
+pyarrow==14.0.1
+sentencepiece==0.1.99
+wandb==0.15.3
+zstd==1.5.5.1
+protobuf==3.20.1
+einops==0.6.1
+scikit-learn==1.2.2
+onnx==1.12.0
+onnxruntime==1.17.1

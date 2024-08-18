@@ -1,0 +1,16 @@
+{
+    "backend_extensions":
+    {
+        "shared_library_path": "libQnnHtpNetRunExtensions.so",
+        "config_file_path": "sm8650_htp_ext_config.json"
+    },
+    "context_configs":
+    {
+        "context_priority": "high"
+    },
+    "graph_configs" : [{
+        "graph_name": "model",
+        "async_execution_order": "fifo",
+        "async_execution_depth": "optimal"
+    }]
+}
