@@ -42,7 +42,7 @@ Please `adb connect` to an Android phone with a [Snapdragon 8 Gen 3](https://www
 ```
 git clone https://huggingface.co/fwtan/llama-1.1b-mobilequant-w4a8-s1024-e60-sym-hf
 export HF_PATH=llama-1.1b-mobilequant-w4a8-s1024-e60-sym-hf
-export HF_HOME=llama-1.1b-mobilequant-w4a8-s1024-e60-sym-hf
+export HF_NAME=llama-1.1b-mobilequant-w4a8-s1024-e60-sym-hf
 ```
 
 - convert the HF model to a simpler format (`sim` model) that can be parsed by [AIMET](https://github.com/fwtan/aimet/tree/user/fuwen.tan/main). This step is only necessary if you'd like to use your own pretrained model.
@@ -79,7 +79,7 @@ The `qnn_model.bin` file can then be used for the provided demo, as discussed in
 ```
 git clone https://huggingface.co/fwtan/llama-1.1b-mobilequant-w8a8-s1024-e60-hf
 export HF_PATH=llama-1.1b-mobilequant-w8a8-s1024-e60-hf
-export HF_HOME=llama-1.1b-mobilequant-w8a8-s1024-e60-hf
+export HF_NAME=llama-1.1b-mobilequant-w8a8-s1024-e60-hf
 ```
 
 - convert the HF model if necessary
