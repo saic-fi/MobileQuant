@@ -40,10 +40,10 @@ class SimConfig:
 
 
 th_configs = {    
-    "llama-1.1b-w4a8": dict(n_layer=22, n_head=32, n_kv_head=4, head_dim=64, n_embd=2048, intermediate_size=5632, vocab_size=32000, block_size=1024, norm_eps=1e-5),
-    "llama-1.1b-w8a8": dict(n_layer=22, n_head=32, n_kv_head=4, head_dim=64, n_embd=2048, intermediate_size=5632, vocab_size=32000, block_size=1024, norm_eps=1e-5, impl_sym_pch_as_slinear=True),
-    "gemma-2b-w4a8": dict(n_layer=18, n_head=8, n_kv_head=1, head_dim=256, n_embd=2048, intermediate_size=16384, vocab_size=256000, block_size=1024, norm_eps=1e-6, act_fn="gelu"),
-    "gemma-2b-w8a8": dict(n_layer=18, n_head=8, n_kv_head=1, head_dim=256, n_embd=2048, intermediate_size=16384, vocab_size=256000, block_size=1024, norm_eps=1e-6, act_fn="gelu", impl_sym_pch_as_slinear=True)
+    "llama-1.1b-mobilequant-w4a8-s1024-e60-sym-hf": dict(n_layer=22, n_head=32, n_kv_head=4, head_dim=64, n_embd=2048, intermediate_size=5632, vocab_size=32000, block_size=1024, norm_eps=1e-5),
+    "llama-1.1b-mobilequant-w8a8-s1024-e60-hf": dict(n_layer=22, n_head=32, n_kv_head=4, head_dim=64, n_embd=2048, intermediate_size=5632, vocab_size=32000, block_size=1024, norm_eps=1e-5, impl_sym_pch_as_slinear=True),
+    "gemma-2b-mobilequant-w4a8-s1024-e60-sym-hf": dict(n_layer=18, n_head=8, n_kv_head=1, head_dim=256, n_embd=2048, intermediate_size=16384, vocab_size=256000, block_size=1024, norm_eps=1e-6, act_fn="gelu"),
+    "gemma-2b-mobilequant-w8a8-s1024-e60-hf": dict(n_layer=18, n_head=8, n_kv_head=1, head_dim=256, n_embd=2048, intermediate_size=16384, vocab_size=256000, block_size=1024, norm_eps=1e-6, act_fn="gelu", impl_sym_pch_as_slinear=True)
 }
 
 

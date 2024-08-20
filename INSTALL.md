@@ -11,7 +11,7 @@ conda install pkg-config cmake eigen==3.3.7
 conda install -c conda-forge liblapacke
 ```
 
-## AIMET for Simulated Quantized Model
+## Qualcomm AIMET, required only for the on-device deployment
 ```
 git clone https://github.com/fwtan/aimet.git
 cd aimet
@@ -29,5 +29,6 @@ Please include the path in your ```.bashrc```:
 export PYTHONPATH=${AIMET_ROOT}/build/staging/universal/lib/python:${PYTHONPATH}
 ```
 
-## [Optional] integer
-If you'd like to try out the real quantized llama model, please install [integer](https://github.com/fwtan/integer).
+## Qualcomm AI Engine Direct SDK (QNN), required only for the on-device deployment
+Please follow the instruction from https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/introduction.html to install QNN, as well as the required packages (e.g. Android NDK, etc).
+The code has been tested with QNN 2.22.6.240515

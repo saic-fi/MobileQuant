@@ -21,7 +21,7 @@ from aimet_torch.model_preparer import prepare_model
 from aimet_torch.quantsim import QuantizationSimModel, load_encodings_to_sim
 from aimet_common.defs import QuantScheme, QuantizationDataType
 from aimet_common.utils import AimetLogger
-AimetLogger.set_level_for_all_areas(logging.INFO)
+AimetLogger.set_level_for_all_areas(logging.ERROR)
 
 
 from mobilellm.model.hf_config import HFConfig
