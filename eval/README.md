@@ -78,5 +78,7 @@ The table below includes the checkpoints for each models:
 - Download the checkpoint
 
 ```
-CUDA_VISIBLE_DEVICES=0 python eval/harness_eval.py --tasks wikitext,arc_challenge,hellaswag,hendrycksTest* --mode custom --hf_path ${CKPT} --output_dir ${OUTPUT_DIR}
+CUDA_VISIBLE_DEVICES=0 python eval/harness_eval.py \
+      --tasks wikitext,arc_challenge,hellaswag,hendrycksTest*
+      --mode custom --hf_path ${CKPT} --output_dir ${OUTPUT_DIR}
 ```
