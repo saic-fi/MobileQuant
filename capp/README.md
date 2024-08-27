@@ -52,6 +52,14 @@ adb shell "cd /data/local/tmp/llm_8gen3_demo && LD_LIBRARY_PATH=. ./simple_app l
 adb shell "cd /data/local/tmp/llm_8gen3_demo && LD_LIBRARY_PATH=. ./simple_app llama-1.1b-mobilequant-w4a8-s1024-e60-sym-8gen3"
 ```
 
+The W8A8 demo will look like:
+
+https://github.com/user-attachments/assets/cbeb87e8-1e35-4b2f-ae44-d77028f7c649
+
+The W4A8 demo will look like:
+
+https://github.com/user-attachments/assets/9352b413-260d-4941-8a2c-6d71e89fe76b
+
 ## Build the demo yourself
 
 ### :panda_face: Installation
