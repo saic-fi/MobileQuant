@@ -4,7 +4,7 @@
 
 </div>
 
-We provide code to profiling the quantized model on an Android phone with a [Snapdragon 8 Gen 3](https://www.qualcomm.com/products/mobile/snapdragon/smartphones/snapdragon-8-series-mobile-platforms/snapdragon-8-gen-3-mobile-platform) NPU.
+We provide code to profile the quantized model on an Android phone with a [Snapdragon 8 Gen 3](https://www.qualcomm.com/products/mobile/snapdragon/smartphones/snapdragon-8-series-mobile-platforms/snapdragon-8-gen-3-mobile-platform) NPU.
 Please install the necessary packages, e.g. [AIMET](https://github.com/fwtan/aimet/tree/user/fuwen.tan/main), [QNN SDK](https://softwarecenter.qualcomm.com/api/download/software/qualcomm_neural_processing_sdk/v2.22.6.240515.zip?query=aiesdk), following [INSTALL.md](../INSTALL.md)
 
 ### :panda_face: Extra requirement for Gemma 2B
