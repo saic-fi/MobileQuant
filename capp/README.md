@@ -54,11 +54,12 @@ adb shell "cd /data/local/tmp/llm_8gen3_demo && LD_LIBRARY_PATH=. ./simple_app l
 
 The W8A8 demo will look like:
 
-https://github.com/user-attachments/assets/cbeb87e8-1e35-4b2f-ae44-d77028f7c649
+https://github.com/user-attachments/assets/a92a1ce5-a06d-40d5-a7d6-bbcd72633542
 
 The W4A8 demo will look like:
 
-https://github.com/user-attachments/assets/9352b413-260d-4941-8a2c-6d71e89fe76b
+https://github.com/user-attachments/assets/34a0bdee-ede5-47d7-95d9-d32b5419ceb5
+
 
 ## Build the demo yourself
 
