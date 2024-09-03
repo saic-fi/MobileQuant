@@ -51,8 +51,18 @@ We include quantization scripts of both the baselines methods, i.e. SmoothQuant,
 As OmniQuant and MobileQuant require proper initialization from SmoothQuant, please run the SmoothQuant scripts before running OmniQuant or MobileQuant.
 
 
+## Citing
 
+If you find our paper/code useful, please consider citing:
 
-
+    @misc{2024_mobilequant,
+      title={MobileQuant: Mobile-friendly Quantization for On-device Language Models}, 
+      author={Fuwen Tan and Royson Lee and Łukasz Dudziak and Shell Xu Hu and Sourav Bhattacharya and Timothy Hospedales and Georgios Tzimiropoulos and Brais Martinez},
+      year={2024},
+      eprint={2408.13933},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2408.13933}
+    }
 
 
