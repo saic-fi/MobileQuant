@@ -6,6 +6,7 @@ from typing import Dict, List, Literal, Optional, Tuple, Union
 import torch
 
 import os.path as osp
+from copy import deepcopy
 from safetensors import SafetensorError
 from safetensors.torch import load_file as safetensors_load
 from safetensors.torch import save_file as safetensors_save
@@ -29,6 +30,7 @@ WEIGHT_RENAME_MAPS = {
     "stablelm": { "gate_proj": "w1", "down_proj": "w2", "up_proj": "w3" },
     "qwen2": { "gate_proj": "w1", "down_proj": "w2", "up_proj": "w3" },
     "mixtral": {"block_sparse_moe": "mlp"},
+    "phi3": {"qkv_proj": ["q_proj", "k_proj", "v_proj"], "gate_up_proj" : ["w1", "w3"], "down_proj": "w2"}
 }
 
 
@@ -37,20 +39,37 @@ def rename_weight(hf_weights, rename_map):
         tgt_name = src_name
         for a, b in rename_map.items():
             if a in src_name:
-                tgt_name = src_name.replace(a, b)
-                break 
-        if tgt_name != src_name:
+                if isinstance(b, (list, tuple)):
+                    tgt_name = [src_name.replace(a, c) for c in b]
+                else:
+                    tgt_name = src_name.replace(a, b) 
+                break
+        if isinstance(tgt_name, (list, tuple)):
+            for c in tgt_name:
+                hf_weights[c] = deepcopy(hf_weights[src_name])
+            hf_weights.pop(src_name)
+        elif tgt_name != src_name:
             hf_weights[tgt_name] = hf_weights[src_name]
             hf_weights.pop(src_name)
     return hf_weights
 
 
-def preprocess_weight(hf_weights, model_type):
-    if model_type != "gemma":
-        return hf_weights
+def preprocess_weight(hf_weights, config):
     for name in list(hf_weights.keys()):
-        if "norm" in name:
+        if "norm" in name and config.model_type == "gemma":
             hf_weights[name] = hf_weights[name] + 1
+        elif config.model_type == "phi3":
+            head_dim = config.hidden_size // config.num_attention_heads
+            if "q_proj" in name:
+                hf_weights[name] = hf_weights[name][:config.hidden_size]
+            if "k_proj" in name:
+                hf_weights[name] = hf_weights[name][config.hidden_size:(config.hidden_size + head_dim * config.num_key_value_heads)]
+            if "v_proj" in name:
+                hf_weights[name] = hf_weights[name][-(head_dim * config.num_key_value_heads):]
+            if "w1" in name:
+                hf_weights[name] = hf_weights[name][:config.intermediate_size]
+            if "w3" in name:
+                hf_weights[name] = hf_weights[name][config.intermediate_size:]
     return hf_weights
 
 
@@ -60,9 +79,16 @@ def rename_index(index_file, rename_map):
         tgt_name = src_name
         for a, b in rename_map.items():
             if a in src_name:
-                tgt_name = src_name.replace(a, b) 
+                if isinstance(b, (list, tuple)):
+                    tgt_name = [src_name.replace(a, c) for c in b]
+                else:
+                    tgt_name = src_name.replace(a, b) 
                 break
-        if tgt_name != src_name:
+        if isinstance(tgt_name, (list, tuple)):
+            for c in tgt_name:
+                index_file["weight_map"][c] = index_file["weight_map"][src_name] 
+            index_file["weight_map"].pop(src_name)
+        elif tgt_name != src_name:
             index_file["weight_map"][tgt_name] = index_file["weight_map"][src_name]
             index_file["weight_map"].pop(src_name)
     return index_file
@@ -104,12 +130,12 @@ def convert_hf_checkpoint(
         if osp.splitext(ckpt_file)[1] == ".bin":
             hf_weights = torch.load(ckpt_file)
             hf_weights = rename_weight(hf_weights, rename_map)
-            hf_weights = preprocess_weight(hf_weights, config.model_type)
+            hf_weights = preprocess_weight(hf_weights, config)
             torch.save(hf_weights, output_dir / osp.basename(ckpt_file))
         else:
             hf_weights = safetensors_load(ckpt_file)
             hf_weights = rename_weight(hf_weights, rename_map)
-            hf_weights = preprocess_weight(hf_weights, config.model_type)
+            hf_weights = preprocess_weight(hf_weights, config)
             safetensors_save(hf_weights, output_dir / osp.basename(ckpt_file), metadata={"format": "pt"})
 
 

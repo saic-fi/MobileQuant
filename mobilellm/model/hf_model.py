@@ -147,17 +147,6 @@ def _get_unpad_data(attention_mask):
     )
 
 
-# def rms_norm(x, weight, epsilon, bias = None):
-#     # z = x.float()
-#     # z = z * torch.rsqrt(z.pow(2).mean(-1, keepdim=True) + epsilon)
-#     # z = z.type_as(x) * weight
-#     alpha = math.sqrt(x.shape[-1])
-#     z = alpha * torch.nn.functional.normalize(x, p=2, dim=-1, eps=1e-12)
-#     z = z * weight
-#     if bias is not None:
-#         z += bias
-#     return z
-
 
 class HFRMSNorm(nn.Module):
     def __init__(self, dim: int, eps: float = 1e-6, device = None, dtype = None, bias = None, l2norm_as_rmsnorm = False):
@@ -198,92 +187,10 @@ class HFRMSNorm(nn.Module):
         return self.forward_impl(x, self.weight, self.bias)
         
 
-
 class HFSkipRMSNorm(HFRMSNorm):
     def forward(self, x):
         output = self._norm(x.float()).type_as(x)
         return output * (self.weight + 1)
-
-
-# class HFRotaryEmbedding(nn.Module):
-#     def __init__(self, dim, max_position_embeddings=2048, base=10000, device=None):
-#         super().__init__()
-
-#         self.dim = dim
-#         self.max_position_embeddings = max_position_embeddings
-#         self.base = base
-#         inv_freq = 1.0 / (self.base ** (torch.arange(0, self.dim, 2, dtype=torch.int64).float().to(device) / self.dim))
-#         self.register_buffer("inv_freq", inv_freq, persistent=False)
-
-#         # Build here to make `torch.jit.trace` work.
-#         self._set_cos_sin_cache(
-#             seq_len=max_position_embeddings, device=self.inv_freq.device, dtype=torch.get_default_dtype()
-#         )
-
-#     def _set_cos_sin_cache(self, seq_len, device, dtype):
-#         self.max_seq_len_cached = seq_len
-#         t = torch.arange(self.max_seq_len_cached, device=device, dtype=torch.int64).type_as(self.inv_freq)
-
-#         freqs = torch.outer(t, self.inv_freq)
-#         # Different from paper, but it uses a different permutation in order to obtain the same calculation
-#         emb = torch.cat((freqs, freqs), dim=-1)
-#         self.register_buffer("cos_cached", emb.cos().to(dtype), persistent=False)
-#         self.register_buffer("sin_cached", emb.sin().to(dtype), persistent=False)
-
-#     def forward(self, x, seq_len=None):
-#         # x: [bs, num_attention_heads, seq_len, head_size]
-#         if seq_len > self.max_seq_len_cached:
-#             self._set_cos_sin_cache(seq_len=seq_len, device=x.device, dtype=x.dtype)
-
-#         return (
-#             self.cos_cached[:seq_len].to(dtype=x.dtype),
-#             self.sin_cached[:seq_len].to(dtype=x.dtype),
-#         )
-
-
-# class HFLinearScalingRotaryEmbedding(HFRotaryEmbedding):
-#     """RotaryEmbedding extended with linear scaling. Credits to the Reddit user /u/kaiokendev"""
-
-#     def __init__(self, dim, max_position_embeddings=2048, base=10000, device=None, scaling_factor=1.0):
-#         self.scaling_factor = scaling_factor
-#         super().__init__(dim, max_position_embeddings, base, device)
-
-#     def _set_cos_sin_cache(self, seq_len, device, dtype):
-#         self.max_seq_len_cached = seq_len
-#         t = torch.arange(self.max_seq_len_cached, device=device, dtype=self.inv_freq.dtype)
-#         t = t / self.scaling_factor
-
-#         freqs = torch.outer(t, self.inv_freq)
-#         # Different from paper, but it uses a different permutation in order to obtain the same calculation
-#         emb = torch.cat((freqs, freqs), dim=-1)
-#         self.register_buffer("cos_cached", emb.cos().to(dtype), persistent=False)
-#         self.register_buffer("sin_cached", emb.sin().to(dtype), persistent=False)
-
-
-# class HFDynamicNTKScalingRotaryEmbedding(HFRotaryEmbedding):
-#     """RotaryEmbedding extended with Dynamic NTK scaling. Credits to the Reddit users /u/bloc97 and /u/emozilla"""
-
-#     def __init__(self, dim, max_position_embeddings=2048, base=10000, device=None, scaling_factor=1.0):
-#         self.scaling_factor = scaling_factor
-#         super().__init__(dim, max_position_embeddings, base, device)
-
-#     def _set_cos_sin_cache(self, seq_len, device, dtype):
-#         self.max_seq_len_cached = seq_len
-
-#         if seq_len > self.max_position_embeddings:
-#             base = self.base * (
-#                 (self.scaling_factor * seq_len / self.max_position_embeddings) - (self.scaling_factor - 1)
-#             ) ** (self.dim / (self.dim - 2))
-#             inv_freq = 1.0 / (base ** (torch.arange(0, self.dim, 2).float().to(device) / self.dim))
-#             self.register_buffer("inv_freq", inv_freq, persistent=False)
-
-#         t = torch.arange(self.max_seq_len_cached, device=device, dtype=self.inv_freq.dtype)
-
-#         freqs = torch.outer(t, self.inv_freq)
-#         # Different from paper, but it uses a different permutation in order to obtain the same calculation
-#         emb = torch.cat((freqs, freqs), dim=-1)
-#         self.register_buffer("cos_cached", emb.cos().to(dtype), persistent=False)
-#         self.register_buffer("sin_cached", emb.sin().to(dtype), persistent=False)
 
 
 class HFRotaryEmbedding(nn.Module):
@@ -299,7 +206,7 @@ class HFRotaryEmbedding(nn.Module):
         self.max_seq_len_cached = seq_len
         t = torch.arange(self.max_seq_len_cached, device=device, dtype=self.inv_freq.dtype)
 
-        freqs = torch.outer(t, self.inv_freq)
+        freqs = torch.outer(t.float(), self.inv_freq.float())
         # Different from paper, but it uses a different permutation in order to obtain the same calculation
         emb = torch.cat((freqs, freqs), dim=-1)
         self.register_buffer("cos_cached", emb.cos().to(dtype), persistent=False)
@@ -326,6 +233,47 @@ class HFRotaryEmbedding(nn.Module):
                 self.sin_cached[:seq_len].to(dtype=dtype),
             )
         raise NotImplementedError
+
+
+class HFLongRoPEScaledRotaryEmbedding(HFRotaryEmbedding):
+    def __init__(self, dim, config, device=None):
+        super().__init__(dim, config.max_position_embeddings, config.rope_theta, device)
+
+        self.short_factor = config.rope_scaling["short_factor"]
+        self.long_factor = config.rope_scaling["long_factor"]
+        self.original_max_position_embeddings = config.original_max_position_embeddings
+
+    @torch.no_grad()
+    def forward(self, position_ids, device, dtype, seq_len=None):
+        seq_len = torch.max(position_ids) + 1
+        if seq_len > self.original_max_position_embeddings:
+            ext_factors = torch.tensor(self.long_factor, dtype=torch.float32, device=device)
+        else:
+            ext_factors = torch.tensor(self.short_factor, dtype=torch.float32, device=device)
+
+        inv_freq_shape = torch.arange(0, self.dim, 2, dtype=torch.int64, device=device).float() / self.dim
+        self.inv_freq = 1.0 / (ext_factors * self.base**inv_freq_shape)
+
+        inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1)
+        position_ids_expanded = position_ids[:, None, :].float()
+
+        # Force float32 since bfloat16 loses precision on long contexts
+        # See https://github.com/huggingface/transformers/pull/29285
+        device_type = device.type
+        device_type = device_type if isinstance(device_type, str) and device_type != "mps" else "cpu"
+        with torch.autocast(device_type=device_type, enabled=False):
+            freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
+            emb = torch.cat((freqs, freqs), dim=-1)
+
+            scale = self.max_position_embeddings / self.original_max_position_embeddings
+            if scale <= 1.0:
+                scaling_factor = 1.0
+            else:
+                scaling_factor = math.sqrt(1 + math.log(scale) / math.log(self.original_max_position_embeddings))
+
+            cos = emb.cos() * scaling_factor
+            sin = emb.sin() * scaling_factor
+        return cos.to(dtype=dtype), sin.to(dtype=dtype)
 
 
 def rotate_half(x):
@@ -415,13 +363,24 @@ class HFAttention(nn.Module):
         self.k_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
         self.v_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=config.attention_bias and (not config.use_qkv_bias_only))
-        self.rotary_emb = HFRotaryEmbedding(
-            int(self.partial_rotary_factor * self.head_dim),
-            max_position_embeddings=self.max_position_embeddings,
-            base=self.rope_theta,
-        )
+        self._init_rope()
         self.qk_bmm = FMatMul()
         self.pv_bmm = FMatMul()
+
+    def _init_rope(self):
+        dim = int(self.partial_rotary_factor * self.head_dim)
+        if self.config.rope_scaling is None:
+            self.rotary_emb = HFRotaryEmbedding(
+                dim,
+                max_position_embeddings=self.max_position_embeddings,
+                base=self.rope_theta,
+            )
+        else:
+            scaling_type = self.config.rope_scaling["type"]
+            if scaling_type == "longrope":
+                self.rotary_emb = HFLongRoPEScaledRotaryEmbedding(dim, self.config)
+            else:
+                raise ValueError(f"Unknown RoPE scaling type {scaling_type}")
 
     def forward(
         self,

@@ -162,6 +162,7 @@ class HFConfig(PretrainedConfig):
         self.rope_scaling = rope_scaling
         self.partial_rotary_factor = partial_rotary_factor
         self.qk_layernorm = qk_layernorm
+        self._rope_scaling_adjustment()
         self._rope_scaling_validation()
 
         self.num_experts_per_tok = num_experts_per_tok
@@ -188,7 +189,19 @@ class HFConfig(PretrainedConfig):
             **kwargs,
         )
 
-    # Copied from transformers.models.llama.configuration_llama.LlamaConfig._rope_scaling_validation
+    def _rope_scaling_adjustment(self):
+        """
+        Adjust the `type` of the `rope_scaling` configuration for backward compatibility.
+        """
+        if self.rope_scaling is None:
+            return
+
+        rope_scaling_type = self.rope_scaling.get("type", None)
+
+        # For backward compatibility if previous version used "su" or "yarn"
+        if rope_scaling_type is not None and rope_scaling_type in ["su", "yarn"]:
+            self.rope_scaling["type"] = "longrope"
+
     def _rope_scaling_validation(self):
         """
         Validate the `rope_scaling` configuration.
@@ -196,16 +209,35 @@ class HFConfig(PretrainedConfig):
         if self.rope_scaling is None:
             return
 
-        if not isinstance(self.rope_scaling, dict) or len(self.rope_scaling) != 2:
+        if not isinstance(self.rope_scaling, dict) or len(self.rope_scaling) != 3:
             raise ValueError(
-                "`rope_scaling` must be a dictionary with with two fields, `type` and `factor`, "
+                "`rope_scaling` must be a dictionary with three fields, `type`, `short_factor` and `long_factor`, "
                 f"got {self.rope_scaling}"
             )
         rope_scaling_type = self.rope_scaling.get("type", None)
-        rope_scaling_factor = self.rope_scaling.get("factor", None)
-        if rope_scaling_type is None or rope_scaling_type not in ["linear", "dynamic"]:
+        rope_scaling_short_factor = self.rope_scaling.get("short_factor", None)
+        rope_scaling_long_factor = self.rope_scaling.get("long_factor", None)
+        if rope_scaling_type is None or rope_scaling_type not in ["longrope"]:
+            raise ValueError(f"`rope_scaling`'s type field must be one of ['longrope'], got {rope_scaling_type}")
+        if not (
+            isinstance(rope_scaling_short_factor, list)
+            and all(isinstance(x, (int, float)) for x in rope_scaling_short_factor)
+        ):
             raise ValueError(
-                f"`rope_scaling`'s type field must be one of ['linear', 'dynamic'], got {rope_scaling_type}"
+                f"`rope_scaling`'s short_factor field must be a list of numbers, got {rope_scaling_short_factor}"
             )
-        if rope_scaling_factor is None or not isinstance(rope_scaling_factor, float) or rope_scaling_factor <= 1.0:
-            raise ValueError(f"`rope_scaling`'s factor field must be a float > 1, got {rope_scaling_factor}")
+        if not len(rope_scaling_short_factor) == self.hidden_size // self.num_attention_heads // 2:
+            raise ValueError(
+                f"`rope_scaling`'s short_factor field must have length {self.hidden_size // self.num_attention_heads // 2}, got {len(rope_scaling_short_factor)}"
+            )
+        if not (
+            isinstance(rope_scaling_long_factor, list)
+            and all(isinstance(x, (int, float)) for x in rope_scaling_long_factor)
+        ):
+            raise ValueError(
+                f"`rope_scaling`'s long_factor field must be a list of numbers, got {rope_scaling_long_factor}"
+            )
+        if not len(rope_scaling_long_factor) == self.hidden_size // self.num_attention_heads // 2:
+            raise ValueError(
+                f"`rope_scaling`'s long_factor field must have length {self.hidden_size // self.num_attention_heads // 2}, got {len(rope_scaling_long_factor)}"
+            )
