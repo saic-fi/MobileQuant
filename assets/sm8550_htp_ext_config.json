@@ -1,0 +1,15 @@
+{
+    "graphs": [{
+        "vtcm_mb": 8,
+        "hvx_threads": 4,
+        "graph_names": ["model"]
+    }],
+    "devices": [{
+        "soc_id": 43,
+        "dsp_arch": "v73",
+        "profiling_level": "linting",
+        "cores": [{
+            "perf_profile": "high_performance"
+        }]
+    }]
+}

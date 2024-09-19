@@ -34,14 +34,22 @@ int main(int argc, char *argv[]) {
     unsigned int log_level = 1; //DEF_LOG_LEVEL;
 
     std::string models_dir;
+    std::string device_type = "8gen3";
 
-    if (argc == 2) {
+    if (argc == 3) {
+        device_type = argv[2];
+    } 
+    
+    if (argc >= 2) {
         models_dir = argv[1];
     } else {
         models_dir = DEF_MODELS_PATH;
     }
     
     std::string model_type = "llama";
+    if (models_dir.find("gemma") != std::string::npos) {
+        model_type = "gemma";
+    }
     int use_htp = 1;
     float temperature = 0.0f;   // 0.0 = greedy deterministic. 1.0 = original. don't set higher
     float topp = 0.9f;          // top-p in nucleus sampling. 1.0 = off. 0.9 works well, but slower
@@ -53,6 +61,7 @@ int main(int argc, char *argv[]) {
         &ctx, 
         models_dir.c_str(), 
         log_level, 
+        device_type.c_str(), 
         use_htp,
         model_type.c_str(), 
         temperature, topp, rng_seed, max_sequence_length
@@ -64,6 +73,9 @@ int main(int argc, char *argv[]) {
     std::string chat_prefix = "";
     std::string chat_suffix = "";
     std::string welcome = "Hello, how can I help you today?\n>>> ";
+    if (model_type == "gemma") {
+        welcome = "Please enter the prompt\n>>> ";
+    }
     std::string cmd;
 
 
@@ -104,7 +116,7 @@ int main(int argc, char *argv[]) {
                 std::cout << "  model type = " << model_type << std::endl;
                 std::cout << "  log level (info:2, debug:3) = " << log_level << std::endl;
 
-                status = libllmod_setup(&ctx, models_dir.c_str(), log_level, use_htp,
+                status = libllmod_setup(&ctx, models_dir.c_str(), log_level, device_type.c_str(), use_htp,
                                         model_type.c_str(), temperature, topp, rng_seed, max_sequence_length);
                 ERR("Initialization errror: ")
                 

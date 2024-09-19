@@ -49,6 +49,13 @@ aarch64-android: check_ndk
 	rm -rf libs
 	cp ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnHtp.so ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnSystem.so ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnHtpV75Stub.so ${QNN_SDK_ROOT}/lib/hexagon-v75/unsigned/libQnnHtpV75Skel.so bin/aarch64-android/
 
+aarch64-android-8gen2: check_ndk
+	$(call build_if_exists,$(libllmod),$(ANDROID_NDK_ROOT)/ndk-build APP_ALLOW_MISSING_DEPS=true APP_ABI="arm64-v8a" NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=$(make_dir)/Application.mk APP_BUILD_SCRIPT=$(make_dir)/Android.mk)
+	mkdir -p bin/aarch64-android-8gen2
+	mv libs/arm64-v8a/* bin/aarch64-android-8gen2
+	rm -rf libs
+	cp ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnHtp.so ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnSystem.so ${QNN_SDK_ROOT}/lib/aarch64-android/libQnnHtpV73Stub.so ${QNN_SDK_ROOT}/lib/hexagon-v73/unsigned/libQnnHtpV73Skel.so bin/aarch64-android-8gen2/
+
 arm-android: check_ndk
 	$(call build_if_exists,$(libllmod),$(ANDROID_NDK_ROOT)/ndk-build APP_ALLOW_MISSING_DEPS=true APP_ABI="armeabi-v7a" NDK_PROJECT_PATH=./ NDK_APPLICATION_MK=$(make_dir)/Application.mk APP_BUILD_SCRIPT=$(make_dir)/Android.mk)
 	mkdir -p bin/arm-android

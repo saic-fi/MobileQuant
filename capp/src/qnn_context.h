@@ -235,7 +235,7 @@ private:
 
 class QnnBackend {
 public:
-    QnnBackend(QnnBackendType backend, std::list<std::string> const& op_packages = std::list<std::string>(), bool burst = true);
+    QnnBackend(QnnBackendType backend, std::string device_type = "8gen3", std::list<std::string> const& op_packages = std::list<std::string>(), bool burst = true);
     ~QnnBackend();
 
     graph_list load_context(std::string const& context_blob);
@@ -260,6 +260,7 @@ private:
     std::optional<QnnHtpPerfInfrastructure_PowerConfig_t> _htp_normal_power_config;
 
     bool burst = true;
+    std::string device_type;
 
     void _init_backend();
     void _init_device();

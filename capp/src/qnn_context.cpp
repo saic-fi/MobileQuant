@@ -759,8 +759,8 @@ QnnContext::~QnnContext() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-QnnBackend::QnnBackend(QnnBackendType backend, std::list<std::string> const& op_packages, bool burst) 
-    : api(QnnApi::get(backend)), burst(burst) {
+QnnBackend::QnnBackend(QnnBackendType backend, std::string device_type, std::list<std::string> const& op_packages, bool burst) 
+    : api(QnnApi::get(backend)), burst(burst), device_type(device_type) {
 
     _init_backend();
     _init_device();
@@ -795,7 +795,11 @@ void QnnBackend::_init_device() {
 
         QnnHtpDevice_CustomConfig_t dev_config_arch;
         dev_config_arch.option = QNN_HTP_DEVICE_CONFIG_OPTION_ARCH;
-        dev_config_arch.arch.arch = QNN_HTP_DEVICE_ARCH_V75;
+        if (device_type == "8gen3") {
+            dev_config_arch.arch.arch = QNN_HTP_DEVICE_ARCH_V75;
+        } else {
+            dev_config_arch.arch.arch = QNN_HTP_DEVICE_ARCH_V73;
+        }
         dev_config_arch.arch.deviceId = 0;
 
         QnnDevice_Config_t config_item;

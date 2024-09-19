@@ -22,7 +22,7 @@ void time_in_ms(
 
 class Context {
 public:
-    Context(std::string const& models_dir, LogLevel log_level, bool use_htp=true);
+    Context(std::string const& models_dir, LogLevel log_level, std::string const& device_type, bool use_htp=true);
     virtual ~Context();
 
     void init();
@@ -41,8 +41,9 @@ public:
 
 protected: // to allow child classes to access these members
     std::string models_dir;
+    std::string device_type;
+    
     bool use_htp;
-
     bool _qnn_initialized = false;
 
     ErrorTable _error_table;

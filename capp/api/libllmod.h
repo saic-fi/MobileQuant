@@ -42,7 +42,8 @@ enum libllmod_log_level {
 LIBLLMOD_API int libllmod_setup(
 	void** context, 
 	const char* models_dir, 
-	unsigned int log_level, 
+	unsigned int log_level,
+   const char* device_type, 
 	int use_htp,
 	const char* model_type, 
 	float temperature, 

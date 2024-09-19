@@ -28,8 +28,8 @@ void libllmod::time_in_ms(
 };
 
 
-Context::Context(std::string const& models_dir, LogLevel log_level, bool use_htp)
-    : models_dir(models_dir), use_htp(use_htp) {
+Context::Context(std::string const& models_dir, LogLevel log_level, std::string const& device_type, bool use_htp)
+    : models_dir(models_dir), device_type(device_type), use_htp(use_htp) {
     _error_table = allocate_error_table();
     _logger.set_level(log_level);
     if (models_dir.empty())
@@ -65,7 +65,7 @@ void Context::initialize_qnn() {
     if (_qnn_initialized)
         return;
 
-    _qnn = std::shared_ptr<QnnBackend>(new QnnBackend(use_htp ? QnnBackendType::HTP : QnnBackendType::GPU));
+    _qnn = std::shared_ptr<QnnBackend>(new QnnBackend(use_htp ? QnnBackendType::HTP : QnnBackendType::GPU, device_type));
     _qnn_initialized = true;
 }
 

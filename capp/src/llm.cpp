@@ -369,12 +369,13 @@ LLM::LLM(
     std::string const& models_dir, 
     std::string const& model_type, 
     LogLevel log_level, 
+    std::string const& device_type, 
     bool use_htp,
     float temperature, 
     float topp, 
     unsigned long long rng_seed, 
     int max_sequence_length
-) : Context(models_dir, log_level, use_htp) {
+) : Context(models_dir, log_level, device_type, use_htp) {
 
     _model_type = model_type;
     // hardcode the tokenized chat template, ugly but work

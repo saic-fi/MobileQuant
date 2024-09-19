@@ -36,6 +36,7 @@ parser.add_argument('--hf_path', type=str, default=None, help='path of the hf mo
 parser.add_argument('--model_name', type=str, default=None)
 parser.add_argument('--max_length', type=int, default=1024, help='max seq len for the samples')
 parser.add_argument('--device_path',    type=str, default='/data/local/tmp/mobilequant')
+parser.add_argument('--device_type',    type=str, default='8gen3', choices=['8gen3', '8gen2'])
 parser.add_argument('--num_blocks',     type=int, default=None)
 parser.add_argument("--output_dir",     type=str, default='results/sim_{}_qnn')
 parser.add_argument('--default_config', type=str, default='assets/aimet_config.json', help='the default config file')
@@ -279,6 +280,8 @@ def main():
     
     #####################################################################
     # On-device
+    chipset_id = 8650 if args.device_type == "8gen3" else 8550
+    hexagon_id = 75 if args.device_type == "8gen3" else 73
 
     del sim, model_fp
     gc.collect()
@@ -346,8 +349,8 @@ def main():
 
     #################################################################################################
     # generate context
-    shutil.copy(str(Path(__file__).parent.parent.joinpath('assets', 'sm8650_htp_basic_config.json')), qnn_dir)
-    shutil.copy(str(Path(__file__).parent.parent.joinpath('assets', 'sm8650_htp_ext_config.json')), qnn_dir)
+    shutil.copy(str(Path(__file__).parent.parent.joinpath('assets', f'sm{chipset_id}_htp_basic_config.json')), qnn_dir)
+    shutil.copy(str(Path(__file__).parent.parent.joinpath('assets', f'sm{chipset_id}_htp_ext_config.json')), qnn_dir)
 
     qnn_command = [
         "qnn-context-binary-generator", 
@@ -355,7 +358,7 @@ def main():
         "--backend", osp.join(qnn_sdk_root, "lib/x86_64-linux-clang/libQnnHtp.so") ,
         "--binary_file", "qnn_model",
         "--output_dir", qnn_dir, 
-        "--config_file", "sm8650_htp_basic_config.json",
+        "--config_file", f"sm{chipset_id}_htp_basic_config.json",
     ]
     result = subprocess.run(qnn_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, cwd=qnn_dir)
     print(result.stdout)
@@ -364,6 +367,7 @@ def main():
 
     #################################################################################################
     # push files to device
+
     print('Pushing input files...')
     msg = subprocess.run(['adb', 'shell', 'mkdir', '-p', args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(msg.stdout.decode('utf-8'))
@@ -372,14 +376,14 @@ def main():
         print(msg.stdout.decode('utf-8'))
     msg = subprocess.run(['adb', 'push', osp.join(args.output_dir, 'htp_file.txt'), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print('Pushing config files...')
-    msg = subprocess.run(['adb', 'push', osp.join(qnn_dir, 'sm8650_htp_basic_config.json'), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    msg = subprocess.run(['adb', 'push', osp.join(qnn_dir, 'sm8650_htp_ext_config.json'), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    msg = subprocess.run(['adb', 'push', osp.join(qnn_dir, f'sm{chipset_id}_htp_basic_config.json'), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    msg = subprocess.run(['adb', 'push', osp.join(qnn_dir, f'sm{chipset_id}_htp_ext_config.json'), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(msg.stdout.decode('utf-8'))
     print('Pushing lib files...')
-    for x in ["libQnnHtp.so", "libQnnHtpNetRunExtensions.so", "libQnnHtpPrepare.so", "libQnnHtpV75Stub.so"]:
+    for x in ["libQnnHtp.so", "libQnnHtpNetRunExtensions.so", "libQnnHtpPrepare.so", f"libQnnHtpV{hexagon_id}Stub.so"]:
         msg = subprocess.run(['adb', 'push', osp.join(qnn_sdk_root, "lib", "aarch64-android", x), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         print(msg.stdout.decode('utf-8'))
-    msg = subprocess.run(['adb', 'push', osp.join(qnn_sdk_root, "lib", "hexagon-v75", "unsigned", "libQnnHtpV75Skel.so"), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    msg = subprocess.run(['adb', 'push', osp.join(qnn_sdk_root, "lib", f"hexagon-v{hexagon_id}", "unsigned", f"libQnnHtpV{hexagon_id}Skel.so"), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(msg.stdout.decode('utf-8'))
     print('Pushing exec file...')
     msg = subprocess.run(['adb', 'push', osp.join(qnn_sdk_root, "bin", "aarch64-android", "qnn-net-run"), args.device_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -398,7 +402,7 @@ def main():
         "--input_list=htp_file.txt",
         f"--output_dir={args.device_path}",
         "--shared_buffer","--profiling_level=basic",
-        "--config_file=sm8650_htp_basic_config.json",
+        f"--config_file=sm{chipset_id}_htp_basic_config.json",
     ]
     result = subprocess.run(qnn_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, cwd=qnn_dir)
     if msg.returncode:

@@ -72,7 +72,8 @@ public:
     LLM(
         std::string const& models_dir, 
         std::string const& model_type, 
-        LogLevel log_level, bool use_htp=true,
+        LogLevel log_level, std::string const& device_type, 
+        bool use_htp=true,
         float temperature=1.0f, float topp=0.9f, 
         unsigned long long rng_seed=0, 
         int max_sequence_length=1024

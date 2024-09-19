@@ -65,7 +65,7 @@ ErrorCode _error(ErrorCode code, Context* c, T&& message, const char* func, cons
     (void)_logger_scope
 
 
-static ErrorCode setup_impl(void** context, const char* models_dir, unsigned int log_level, bool use_htp,
+static ErrorCode setup_impl(void** context, const char* models_dir, unsigned int log_level, const char* device_type, bool use_htp,
                             const char* model_type, float temperature, float topp, unsigned long long rng_seed, int max_sequence_length) {
     Context* cptr = nullptr; // NOTE: ERROR(code, reason) requires cptr
 
@@ -91,6 +91,7 @@ static ErrorCode setup_impl(void** context, const char* models_dir, unsigned int
             models_dir, 
             hnd->model_type, 
             static_cast<LogLevel>(log_level), 
+            device_type,
             use_htp, 
             temperature, 
             topp, 
@@ -206,9 +207,9 @@ static const char* get_last_error_extra_info_impl(int errorcode, void* context) 
 
 extern "C" {
 
-LIBLLMOD_API int libllmod_setup(void** context, const char* models_dir, unsigned int log_level, int use_htp,
+LIBLLMOD_API int libllmod_setup(void** context, const char* models_dir, unsigned int log_level, const char* device_type, int use_htp,
                                 const char* model_type, float temperature, float topp, unsigned long long rng_seed, int max_sequence_length) {
-    return static_cast<int>(libllmod::setup_impl(context, models_dir, log_level, static_cast<bool>(use_htp),
+    return static_cast<int>(libllmod::setup_impl(context, models_dir, log_level, device_type, static_cast<bool>(use_htp),
                                                  model_type, temperature, topp, rng_seed, max_sequence_length));
 }
 
