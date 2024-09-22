@@ -55,14 +55,12 @@ As OmniQuant and MobileQuant require proper initialization from SmoothQuant, ple
 
 If you find our paper/code useful, please consider citing:
 
-    @misc{2024_mobilequant,
-      title={MobileQuant: Mobile-friendly Quantization for On-device Language Models}, 
-      author={Fuwen Tan and Royson Lee and Łukasz Dudziak and Shell Xu Hu and Sourav Bhattacharya and Timothy Hospedales and Georgios Tzimiropoulos and Brais Martinez},
+    @inproceedings{2024_mobilequant,
+      title={MobileQuant: Mobile-friendly Quantization for On-device Language Models},
+      author={Fuwen Tan and Royson Lee and Łukasz Dudziak and Shell Xu Hu and Sourav Bhattacharya and Timothy Hospedales and Georgios Tzimiropoulos and Brais Martinezs},
+      booktitle={The 2024 Conference on Empirical Methods in Natural Language Processing},
       year={2024},
-      eprint={2408.13933},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2408.13933}
+      url={https://openreview.net/forum?id=48ptWWA54E}
     }
 
 
